@@ -14,16 +14,14 @@ class ViewController: UIViewController {
     
     var number1: Double = 0.0
     var op: String = ""
-    var reset: Bool = false
+    var shouldBeCleared: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     
     func fact(n: Double) -> Double {
@@ -33,25 +31,36 @@ class ViewController: UIViewController {
             return n * fact(n-1)
         }
     }
-
+    
+    var count: Double = 0
+    var number2: Double = 0
+    
+    //When a function button is clicked
     @IBAction func didSelectFunction(sender: UIButton) {
+        //When the function is not =, number in the display is stored as number1. Then the display is cleared.
         if sender.titleLabel!.text! != "=" {
             self.number1 = Double(self.display.text!)!
-            self.reset = true
+            self.shouldBeCleared = true
         }
         switch sender.titleLabel!.text! {
             case "AC":
                 self.display.text! = "0"
                 number1 = 0
                 op = ""
-                reset = false
+                shouldBeCleared = false
             case "AVG":
                 self.op = "AVG"
+                number2 += Double(self.display.text!)!
+                count += 1
             case "COUNT":
-                self.display.text! = "\(self.display.text!.characters.count)"
-                number1 = 0
+                self.op = "COUNT"
+                count += 1
             case "FACT":
                 self.display.text! = "\(fact(number1))"
+            
+            //The spec states that, for example, 2 + 3 = 5 is the format that the user will input. I am assuming this will be true for mod, divide, multiply, subtract and add operations. If more are entered, it will take the last two numbers that are sandwiched between the operation and before the = button is pressed and calculate the results.
+            case "%":
+                self.op = "%"
             case "/":
                 self.op = "/"
             case "*":
@@ -61,11 +70,20 @@ class ViewController: UIViewController {
             case "+":
                 self.op = "+"
             case "=":
-                let number2 = Double(self.display.text!)!
+                if self.op != "AVG" {
+                    number2 = Double(self.display.text!)!
+                }
                 var output: Double = 0
                 switch op {
                     case "AVG":
-                        output = (number1 + number2) / 2.0
+                        //In this case number2 is collecting the sum
+                        output = (number2) / (count + 1)
+                        count = 0
+                    case "COUNT":
+                        output = count + 1
+                        count = 0
+                    case "%":
+                        output = number1 % number2
                     case "/":
                         output = number1 / number2
                     case "*":
@@ -86,9 +104,9 @@ class ViewController: UIViewController {
     @IBAction func didSelectNumber(sender: UIButton) {
         if self.display.text! == "0" {
             self.display.text! = ""
-        } else if reset {
+        } else if shouldBeCleared {
             self.display.text! = ""
-            self.reset = false
+            self.shouldBeCleared = false
         }
         switch sender.titleLabel!.text! {
             case "0":
