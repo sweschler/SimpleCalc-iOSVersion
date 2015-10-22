@@ -147,7 +147,17 @@ class ViewController: UIViewController {
                 case "*":
                     total = RPNArr.reduce(1, combine: *)
                     self.display.text! = ("\(total)")
-
+                case "COUNT":
+                    self.display.text! = ("\(self.display.text!.characters.count)")
+                case "AVG":
+                    total = (RPNArr.reduce(0, combine: +) / Double(RPNArr.count))
+                    self.display.text! = ("\(total)")
+                case "%":
+                    if RPNArr.count == 2 {
+                        self.display.text! = ("\(RPNArr[0] % RPNArr[1])")
+                    }
+                case "FACT":
+                    self.display.text! = "\(fact(Double(self.display.text!)!))"
                 default:
                     break
 
