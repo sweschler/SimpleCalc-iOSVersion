@@ -32,79 +32,149 @@ class ViewController: UIViewController {
         }
     }
     
-    var count: Double = 0
-    var number2: Double = 0
+    var traditional: Bool = true
     
-    //When a function button is clicked
-    @IBAction func didSelectFunction(sender: UIButton) {
+    @IBAction func RPNFunctionality(sender: UISwitch) {
+        //The RPN calculator is on when the switch is off
+        traditional = sender.on
+        AC()
+    }
+    
+    func AC() {
+        self.display.text = "0"
+        self.number1 = 0
+        self.number2 = 0
+        op = ""
+        shouldBeCleared = false
+    }
+    
+    func traditionalVersion(sender: UIButton) {
         //When the function is not =, number in the display is stored as number1. Then the display is cleared.
         if sender.titleLabel!.text! != "=" {
             self.number1 = Double(self.display.text!)!
             self.shouldBeCleared = true
         }
         switch sender.titleLabel!.text! {
-            case "AC":
-                self.display.text! = "0"
-                number1 = 0
-                op = ""
-                shouldBeCleared = false
-            case "AVG":
-                self.op = "AVG"
-                number2 += Double(self.display.text!)!
-                count += 1
-            case "COUNT":
-                self.op = "COUNT"
-                count += 1
-            case "FACT":
-                self.display.text! = "\(fact(number1))"
+        case "AC":
+            AC()
+        case "AVG":
+            self.op = "AVG"
+            //adding every number diplayed to variable number2
+            number2 += Double(self.display.text!)!
+            count += 1
+        case "COUNT":
+            self.op = "COUNT"
+            count += 1
+        case "FACT":
+            self.display.text! = "\(fact(number1))"
             
             //The spec states that, for example, 2 + 3 = 5 is the format that the user will input. I am assuming this will be true for mod, divide, multiply, subtract and add operations. If more are entered, it will take the last two numbers that are sandwiched between the operation and before the = button is pressed and calculate the results.
-            case "%":
-                self.op = "%"
-            case "/":
-                self.op = "/"
-            case "*":
-                self.op = "*"
-            case "-":
-                self.op = "-"
-            case "+":
-                self.op = "+"
-            case "=":
-                if self.op != "AVG" {
-                    number2 = Double(self.display.text!)!
-                }
-                var output: Double = 0
-                switch op {
-                    case "AVG":
-                        //In this case number2 is collecting the sum
-                        output = (number2) / (count + 1)
-                        count = 0
-                    case "COUNT":
-                        output = count + 1
-                        count = 0
-                    case "%":
-                        output = number1 % number2
-                    case "/":
-                        output = number1 / number2
-                    case "*":
-                        output = number1 * number2
-                    case "+":
-                        output = number1 + number2
-                    case "-":
-                        output = number1 - number2
-                    default:
-                        break
+        case "%":
+            self.op = "%"
+        case "/":
+            self.op = "/"
+        case "*":
+            self.op = "*"
+        case "-":
+            self.op = "-"
+        case "+":
+            self.op = "+"
+        case "=":
+            if self.op != "AVG" {
+                number2 = Double(self.display.text!)!
+            } else {
+                number2 += Double(self.display.text!)!
             }
-            self.display.text! = ("\(output)")
+            var output: Double = 0
+            switch op {
+            case "AVG":
+                //In this case number2 is collecting the sum
+                output = (number2) / (count + 1)
+                count = 0
+                number2 = 0
+            case "COUNT":
+                output = count + 1
+                count = 0
+            case "%":
+                output = number1 % number2
+            case "/":
+                output = number1 / number2
+            case "*":
+                output = number1 * number2
+            case "+":
+                output = number1 + number2
+            case "-":
+                output = number1 - number2
             default:
                 break
+            }
+            self.display.text! = ("\(output)")
+            self.shouldBeCleared = true
+            default:
+                break
+        }
+
+    }
+    
+    var RPNArr: [Double] = []
+    var total: Double = 0
+    //The RPN calculator function
+    func RPNVersion(sender: UIButton) {
+        
+        
+        RPNArr.append(Double(self.display.text!)!)
+        if sender.titleLabel!.text! == "=" {
+            self.shouldBeCleared = true
+        } else {
+            switch sender.titleLabel!.text! {
+                case "AC":
+                    AC()
+                case "+":
+                    total = RPNArr.reduce(0, combine: +)
+                    self.display.text! = ("\(total)")
+                case "-":
+                    total = RPNArr[0]
+                    for num in 1...(RPNArr.count - 1) {
+                        total -= RPNArr[num]
+                    }
+                    self.display.text! = ("\(total)")
+                case "/":
+                    total = RPNArr[0]
+                    for num in 1...(RPNArr.count - 1) {
+                        total /= RPNArr[num]
+                    }
+                    self.display.text! = ("\(total)")
+                case "*":
+                    total = RPNArr.reduce(1, combine: *)
+                    self.display.text! = ("\(total)")
+
+                default:
+                    break
+
+            }
+            RPNArr = []
+            self.shouldBeCleared = true
+        }
+        
+    }
+    
+    var count: Double = 0
+    var number2: Double = 0
+    
+    //When a function button is clicked
+    @IBAction func didSelectFunction(sender: UIButton) {
+        if traditional {
+            traditionalVersion(sender)
+        } else {
+            RPNVersion(sender)
         }
     }
 
     @IBAction func didSelectNumber(sender: UIButton) {
         if self.display.text! == "0" {
             self.display.text! = ""
-        } else if shouldBeCleared {
+        }
+        if shouldBeCleared {
             self.display.text! = ""
             self.shouldBeCleared = false
         }
